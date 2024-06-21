@@ -13,9 +13,12 @@ import Rating from "../components/Rating";
 import { Helmet } from "react-helmet-async";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
-import { API_URL, getError } from "../utils";
+import { API_URL, PRODUCT_QUERY_MESSAGE, getError } from "../utils";
 import { Store } from "../Store";
 import { toast } from "react-toastify";
+import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
+import { sendChat } from "../components/Chat/api";
+
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -45,9 +48,10 @@ const ProductScreen = () => {
   const [comment, setComment] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
 
-  const navigate = useNavigate();
   const params = useParams();
   const { slug } = params;
+
+  const navigate= useNavigate();
 
   const [{ loading, error, product, loadingCreateReview }, dispatch] =
     useReducer(reducer, {
@@ -86,6 +90,18 @@ const ProductScreen = () => {
     ctxDispatch({ type: "CART_ADD_ITEM", payload: { ...product, quantity } });
     navigate("/cart");
   };
+
+  const chatHandler=async()=>{
+    try{
+    await sendChat({productId:product?._id,message:PRODUCT_QUERY_MESSAGE,token:userInfo?.token});
+    navigate(`/chat/${product?._id}`);
+    }
+    catch(error){
+      console.error("error in sending the chat...");
+      console.log(error);
+      toast.error("Error in sending the chat");
+    }
+  }
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -189,14 +205,14 @@ const ProductScreen = () => {
               <ListGroup variant="flush">
                 <ListGroup.Item>Seller </ListGroup.Item>
                 <ListGroup.Item>
-                  <Link to={`/seller/${product.seller._id}`}>
-                    {product.seller.seller.name}
+                  <Link to={`/seller/${product?.seller?._id || ""}`}>
+                    {product?.seller?.seller.name}
                   </Link>
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <Rating
-                    rating={product.seller.seller.rating}
-                    numReviews={product.seller.seller.numReviews}
+                    rating={product?.seller?.seller?.rating}
+                    numReviews={product?.seller?.seller?.numReviews}
                   ></Rating>
                 </ListGroup.Item>
                 <ListGroup.Item>
@@ -223,6 +239,9 @@ const ProductScreen = () => {
                     <div className="d-grid">
                       <Button onClick={addToCartHandler} variant="primary">
                         Add to Cart
+                      </Button>
+                      <Button onClick={chatHandler} variant="success" className="flex justify-center items-center gap-2 mt-1">
+                        Contact Seller
                       </Button>
                     </div>
                   </ListGroup.Item>

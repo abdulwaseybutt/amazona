@@ -10,6 +10,7 @@ import userRouter from "./routers/userRoutes.js";
 import orderRouter from "./routers/orderRoutes.js";
 import uploadRouter from "./routers/uploadRoutes.js";
 import cors from "cors";
+import chatRouter from "./routers/chatRoutes.js";
 
 dotenv.config();
 const url = process.env.MONGODB_URI;
@@ -29,7 +30,7 @@ db.once("open", () => {
 //     })
 //     .catch(err => console.log(err.message));
 const corsOptions = {
-  origin: ["http://localhost:3000", "http://77.37.51.85:3000"],
+  origin: ["http://localhost:3000", "http://192.168.137.121:3000"],
   optionsSuccessStatus: 200,
 };
 
@@ -52,6 +53,7 @@ app.use("/api/seed", seedRouter);
 app.use("/api/products", productRouter);
 app.use("/api/users", userRouter);
 app.use("/api/orders", orderRouter);
+app.use("/api/chat", chatRouter);
 
 const __dirname = path.resolve();
 app.use(express.static(path.join(__dirname, "/frontend/build")));
