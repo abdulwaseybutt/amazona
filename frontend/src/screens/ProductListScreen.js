@@ -1,4 +1,10 @@
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState,
+} from "react";
 import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Row from "react-bootstrap/Row";
@@ -86,6 +92,26 @@ export default function ProductListScreen(props) {
   const [productList, setProductList] = useState([]);
   const [produdtImageUrl, setProductImageUrl] = useState([]);
 
+  const submitDisabled = useMemo(() => {
+    const {
+      product_name,
+      product_brand,
+      product_category,
+      product_desc,
+      product_stock,
+      product_price,
+    } = formData;
+    return Boolean(
+      !product_name ||
+        !product_brand ||
+        !product_category ||
+        !product_desc ||
+        !product_stock ||
+        !product_price ||
+        !produdtImageUrl
+    );
+  }, [formData, produdtImageUrl]);
+
   useEffect(() => {
     fetchCategories();
     const fetchData = async (seller) => {
@@ -143,7 +169,6 @@ export default function ProductListScreen(props) {
       const data = await axios.delete(`${API_URL}api/products/${product._id}`, {
         headers: { Authorization: `Bearer ${userInfo.token}` },
       });
-      console.log("data ", data);
       if (userInfo && userInfo?.isAdmin) {
         setProductList(data?.data);
       } else if (userInfo && userInfo?.isSeller) {
@@ -164,12 +189,13 @@ export default function ProductListScreen(props) {
   const fetchCategories = async () => {
     const result = await fetch(`${API_URL}api/products/categories`);
     const categories = await result.json();
-    console.log("categories ", categories);
     setCategoriesList(categories);
+    setFormData({ ...formData, product_category: categories[0] });
   };
 
   const uploadFileHandler = async (e) => {
     const file = e.target.files[0];
+    if (!file) return;
     const reader = new FileReader();
 
     reader.onload = () => {
@@ -384,7 +410,7 @@ export default function ProductListScreen(props) {
                       htmlFor="p_name"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
-                      Product Name
+                      Product Name*
                     </label>
                     <div className="mt-2">
                       <input
@@ -409,7 +435,7 @@ export default function ProductListScreen(props) {
                       htmlFor="p_price"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
-                      Product Price
+                      Product Price*
                     </label>
                     <div className="mt-2">
                       <input
@@ -434,7 +460,7 @@ export default function ProductListScreen(props) {
                       htmlFor="p_cat"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
-                      Product Category
+                      Product Category*
                     </label>
                     <div className="mt-2">
                       <select
@@ -460,7 +486,7 @@ export default function ProductListScreen(props) {
                       htmlFor="p_image"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
-                      Product Image
+                      Product Image*
                     </label>
                     <div className="mt-2">
                       <input
@@ -523,7 +549,7 @@ export default function ProductListScreen(props) {
                       htmlFor="p_brand"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
-                      Product Brand
+                      Product Brand*
                     </label>
                     <div className="mt-2">
                       <input
@@ -548,7 +574,7 @@ export default function ProductListScreen(props) {
                       htmlFor="p_stock"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
-                      Count in Stock
+                      Count in Stock*
                     </label>
                     <div className="mt-2">
                       <input
@@ -573,7 +599,7 @@ export default function ProductListScreen(props) {
                       htmlFor="p_description"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
-                      Description
+                      Description*
                     </label>
                     <div className="mt-2">
                       <input
@@ -597,6 +623,7 @@ export default function ProductListScreen(props) {
                     <button
                       onClick={submitHandler}
                       type="submit"
+                      disabled={submitDisabled}
                       className="flex w-full justify-center rounded-md bg-orange-600 px-3 py-1.5 text-sm font-bold transition-all leading-6 text-white hover:text-orange-600 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                     >
                       Create

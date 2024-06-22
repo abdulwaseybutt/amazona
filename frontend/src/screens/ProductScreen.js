@@ -125,80 +125,37 @@ const ProductScreen = () => {
   ) : error ? (
     <MessageBox variant="danger">{error}</MessageBox>
   ) : (
-    <div>
+    <div className="product-screen-container">
       <Row>
-        <Col md={6}>
+        <Col md={3} />
+        <Col md={3}>
           <img
             className="img-large"
             src={selectedImage || product.image}
             alt={product.name}
           ></img>
         </Col>
-        <Col md={3}>
-          <ListGroup variant="flush">
-            <ListGroup.Item>
-              <Helmet>
-                <title>{product.name}</title>
-              </Helmet>
-              <h1>{product.name}</h1>
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <Rating
-                rating={product.rating}
-                numReviews={product.numReviews}
-              ></Rating>
-            </ListGroup.Item>
-            <ListGroup.Item>Price : ${product.price}</ListGroup.Item>
-            <ListGroup.Item>
-              <Row xs={1} md={2} className="g-2">
-                {[product.image, ...product.images]?.map((x) => (
-                  <Col key={x}>
-                    <Card>
-                      <Button
-                        className="thumbnail"
-                        type="button"
-                        variant="light"
-                        onClick={() => setSelectedImage(x)}
-                      >
-                        <Card.Img variant="top" src={x} alt="product" />
-                      </Button>
-                    </Card>
-                  </Col>
-                ))}
-              </Row>
-            </ListGroup.Item>
-            <ListGroup.Item>
-              Description:
-              <p>{product.description}</p>
-            </ListGroup.Item>
-            {/* <ListGroup.Item>
-                                Seller{' '}
-                                <Link to={`/seller/${product.seller._id}`}>
-                                    {product.seller.seller.name}
-                                </Link>
-                                <Rating
-                                    rating={product.seller.seller.rating}
-                                    numReviews={product.seller.seller.numReviews}
-                                ></Rating>
-                            </ListGroup.Item> */}
-          </ListGroup>
-        </Col>
+
         <Col md={3}>
           <Card>
             <Card.Body>
               <ListGroup variant="flush">
-                <ListGroup.Item>Seller </ListGroup.Item>
-                <ListGroup.Item>
-                  <Link to={`/seller/${product.seller._id}`}>
-                    {product.seller.seller.name}
-                  </Link>
-                </ListGroup.Item>
-                <ListGroup.Item>
-                  <Rating
-                    rating={product.seller.seller.rating}
-                    numReviews={product.seller.seller.numReviews}
-                  ></Rating>
-                </ListGroup.Item>
+                {product?.seller && (
+                  <>
+                    <ListGroup.Item>Seller </ListGroup.Item>
+                    <ListGroup.Item>
+                      <Link to={`/seller/${product.seller?._id}`}>
+                        {product.seller?.seller?.name}
+                      </Link>
+                    </ListGroup.Item>
+                    <ListGroup.Item>
+                      <Rating
+                        rating={product.seller.seller.rating}
+                        numReviews={product.seller.seller.numReviews}
+                      ></Rating>
+                    </ListGroup.Item>
+                  </>
+                )}
                 <ListGroup.Item>
                   <Row>
                     <Col>Price:</Col>
@@ -231,9 +188,63 @@ const ProductScreen = () => {
             </Card.Body>
           </Card>
         </Col>
+        <Col md={3} />
       </Row>
-      <div className="my-3">
-        <h2 ref={reviewsRef}>Reviews</h2>
+      <Row>
+        <Col md={3}>
+          <ListGroup variant="flush">
+            <ListGroup.Item>
+              <Helmet>
+                <title>{product.name}</title>
+              </Helmet>
+              <h1>{product.name}</h1>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <Rating
+                rating={product.rating}
+                numReviews={product.numReviews}
+              ></Rating>
+            </ListGroup.Item>
+            <ListGroup.Item>Price : ${product.price}</ListGroup.Item>
+            <ListGroup.Item>
+              <Row xs={1} md={2} className="g-2">
+                {[product.image, ...product.images]?.map((x) => (
+                  <Col key={x}>
+                    <Card className="product-preview-image">
+                      <Button
+                        className="thumbnail"
+                        type="button"
+                        variant="light"
+                        onClick={() => setSelectedImage(x)}
+                      >
+                        <Card.Img variant="top" src={x} alt="product" />
+                      </Button>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              <b>Description:</b>
+              <p>{product.description}</p>
+            </ListGroup.Item>
+            {/* <ListGroup.Item>
+                                Seller{' '}
+                                <Link to={`/seller/${product.seller._id}`}>
+                                    {product.seller.seller.name}
+                                </Link>
+                                <Rating
+                                    rating={product.seller.seller.rating}
+                                    numReviews={product.seller.seller.numReviews}
+                                ></Rating>
+                            </ListGroup.Item> */}
+          </ListGroup>
+        </Col>
+      </Row>
+      <div className="my-3 product-review-container">
+        <h2 ref={reviewsRef} className="review-heading">
+          <b>Reviews</b>
+        </h2>
         <div className="mb-3">
           {product.reviews.length === 0 && (
             <MessageBox>There is no review</MessageBox>

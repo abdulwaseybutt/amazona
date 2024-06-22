@@ -69,12 +69,12 @@ main {
   max-width: 600px;
 }
 
-.checkout-steps>div {
+.checkout-steps > div {
   border-bottom: 0.2rem solid #a0a0a0;
   color: #a0a0a0;
 }
 
-.checkout-steps>div.active {
+.checkout-steps > div.active {
   border-bottom: 0.2rem solid #f08000;
   color: #f08000;
 }
@@ -261,15 +261,32 @@ button.thumbnail {
   /* color: #fff !important; */
 }
 
-
 .navbar {
   background-color: white !important;
 }
 
-@media only screen and (max-width:767px) {
+.product-screen-container {
+  padding: 48px 24px;
+}
 
+@media only screen and (max-width: 767px) {
   .active-cont {
     margin-left: 0px !important;
   }
 
+  .product-review-container {
+    padding: 0px 16px;
+  }
+
+  .product-screen-container {
+    padding: 24px 15px;
+  }
+
+  .product-preview-image {
+    max-width: 150px;
+  }
+}
+
+.review-heading {
+  margin-bottom: 5px;
 }
