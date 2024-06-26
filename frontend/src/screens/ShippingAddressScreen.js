@@ -60,7 +60,7 @@ const ShippingAddressScreen = () => {
       })
     );
 
-    navigate("/payment");
+    navigate("/placeorder");
   };
 
   useEffect(() => {

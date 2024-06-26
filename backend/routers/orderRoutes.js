@@ -154,7 +154,7 @@ orderRouter.put(
       "user",
       "email name"
     );
-    const { id, status, update_time, email_address } = req.body;
+    const { id, status, update_time } = req.body;
 
     if (order) {
       order.isPaid = true;
@@ -163,7 +163,6 @@ orderRouter.put(
         id,
         status,
         update_time,
-        email_address,
       };
 
       const updatedOrder = await order.save();

@@ -10,6 +10,7 @@ import userRouter from "./routers/userRoutes.js";
 import orderRouter from "./routers/orderRoutes.js";
 import uploadRouter from "./routers/uploadRoutes.js";
 import cors from "cors";
+import stripeRouter from "./routers/stripeRouter.js";
 
 dotenv.config();
 const url = process.env.MONGODB_URI;
@@ -52,6 +53,7 @@ app.use("/api/seed", seedRouter);
 app.use("/api/products", productRouter);
 app.use("/api/users", userRouter);
 app.use("/api/orders", orderRouter);
+app.use("/api/stripe", stripeRouter);
 
 const __dirname = path.resolve();
 app.use(express.static(path.join(__dirname, "/frontend/build")));
