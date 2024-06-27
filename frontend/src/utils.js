@@ -1,5 +1,6 @@
 export const getError = (error) => {
-  return error.response && error.response.data.message
+  return error.response && error.response.data.message;
+  return error?.response && error.response.data?.message
     ? error.response.data.message
     : error.message;
 };
@@ -35,3 +36,4 @@ export function timeAgo(date) {
     return yearsAgo === 1 ? '1 year ago' : `${yearsAgo} years ago`;
   }
 }
+

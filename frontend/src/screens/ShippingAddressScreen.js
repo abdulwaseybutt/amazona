@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import Form from "react-bootstrap/Form";
@@ -22,6 +22,10 @@ const ShippingAddressScreen = () => {
     shippingAddress.postalCode || ""
   );
   const [country, setCountry] = useState(shippingAddress.country || "");
+
+  const submitDisabled = useMemo(() => {
+    return Boolean(!fullName || !address || !city || !postalCode || !country);
+  }, [fullName, address, city, postalCode, country]);
 
   useEffect(() => {
     if (!userInfo) {
@@ -56,7 +60,7 @@ const ShippingAddressScreen = () => {
       })
     );
 
-    navigate("/payment");
+    navigate("/placeorder");
   };
 
   useEffect(() => {
@@ -86,7 +90,7 @@ const ShippingAddressScreen = () => {
                   htmlFor="name"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  Full Name
+                  Full Name*
                 </label>
                 <div className="mt-2">
                   <input
@@ -107,7 +111,7 @@ const ShippingAddressScreen = () => {
                   htmlFor="address"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  Address
+                  Address*
                 </label>
                 <div className="mt-2">
                   <input
@@ -128,7 +132,7 @@ const ShippingAddressScreen = () => {
                   htmlFor="city"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  City
+                  City*
                 </label>
                 <div className="mt-2">
                   <input
@@ -149,7 +153,7 @@ const ShippingAddressScreen = () => {
                   htmlFor="postalCode"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  Postal Code
+                  Postal Code*
                 </label>
                 <div className="mt-2">
                   <input
@@ -170,7 +174,7 @@ const ShippingAddressScreen = () => {
                   htmlFor="country`"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  Country
+                  Country*
                 </label>
                 <div className="mt-2">
                   <input
@@ -186,7 +190,7 @@ const ShippingAddressScreen = () => {
                 </div>
               </div>
 
-              <div>
+              {/* <div>
                 <Button
                   id="chooseOnMap"
                   type="button"
@@ -204,11 +208,12 @@ const ShippingAddressScreen = () => {
                 ) : (
                   <div>No location</div>
                 )}
-              </div>
+              </div> */}
               <div>
                 <button
                   onClick={submitHandler}
                   type="submit"
+                  disabled={submitDisabled}
                   className="flex w-full justify-center rounded-md bg-orange-600 px-3 py-1.5 text-sm font-bold transition-all leading-6 text-white hover:text-orange-600 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
                   Continue

@@ -178,7 +178,11 @@ export default function PlaceOrderScreen() {
               <div className="flex w-full flex-col gap-2">
                 <div className="divide-y divide-gray-200 border-b border-t border-gray-200">
                   {cart?.cartItems?.map((product, index) => (
-                    <CartItem product={product} index={index} />
+                    <CartItem
+                      key={`cart-item-${index}`}
+                      product={product}
+                      index={index}
+                    />
                   ))}
                 </div>
                 <Link to="/cart">Edit</Link>
