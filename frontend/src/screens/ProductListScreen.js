@@ -128,7 +128,7 @@ export default function ProductListScreen(props) {
         } else if (userInfo && userInfo?.isSeller) {
           const sellerId = userInfo?._id;
           const sellerProducts = data?.data?.filter(
-            (item) => item?.userId == sellerId
+            (item) => item?.userId === sellerId
           );
           setProductList(sellerProducts);
         }

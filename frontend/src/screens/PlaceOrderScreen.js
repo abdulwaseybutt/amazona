@@ -47,7 +47,6 @@ export default function PlaceOrderScreen() {
     const {
       cartItems,
       shippingAddress,
-      paymentMethod,
       itemsPrice,
       shippingPrice,
       taxPrice,
@@ -56,7 +55,7 @@ export default function PlaceOrderScreen() {
     const orderData = {
       orderItems: cartItems,
       shippingAddress,
-      paymentMethod,
+      paymentMethod: "stripe",
       itemsPrice,
       shippingPrice,
       taxPrice,
@@ -84,7 +83,7 @@ export default function PlaceOrderScreen() {
 
   useEffect(() => {
     if (!cart.paymentMethod) {
-      navigate("/payment");
+      navigate("/placeorder");
     }
   }, [cart, navigate]);
 
