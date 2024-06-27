@@ -10,7 +10,9 @@ import {
 } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 
-import { useContext } from "react";
+import { IoChatbubbleOutline } from "react-icons/io5";
+import { FiShoppingCart } from "react-icons/fi";
+
 import SearchBox from "../SearchBox";
 
 function NavBar({
@@ -78,18 +80,27 @@ function NavBar({
             <SearchBox />
           </div>
 
-          <Nav className="sm:justify-content-end justify-center sm:items-center items-start gap-3 flex-row sm:pt-0 pt-6 sm:w-40 min-w-40 w-full">
+          <Nav className="sm:justify-content-end justify-center sm:items-center items-start flex-row sm:pt-0 pt-6 sm:w-40 min-w-40 w-full">
+
+            <Link
+              to="/chat"
+              className="nav-link text-sm font-semibold leading-6 relative w-max text-[#212529] cursor-pointer flex align-middle items-center"
+            >
+              <IoChatbubbleOutline size="20px" />
+            </Link>
+
             <Link
               to="/cart"
               className="nav-link text-sm font-semibold leading-6 relative w-max text-[#212529] cursor-pointer flex align-middle items-center"
             >
-              Cart
+              <FiShoppingCart size="20px"/>
               {cart.cartItems.length > 0 && (
                 <Badge pill bg="danger" className="absolute -top-1 -right-1">
                   {cart.cartItems.reduce((a, c) => a + c.quantity, 0)}
                 </Badge>
               )}
             </Link>
+
             {userInfo && !userInfo.isSeller && !userInfo.isAdmin ? (
               <NavDropdown
                 className="text-sm font-semibold leading-6 text-[#212529] cursor-pointer"
@@ -131,6 +142,9 @@ function NavBar({
                 </LinkContainer>
                 <LinkContainer to="/seller/orders">
                   <NavDropdown.Item>Orders</NavDropdown.Item>
+                </LinkContainer>
+                <LinkContainer to="/chat/seller/" >
+                  <NavDropdown.Item>Chat</NavDropdown.Item>
                 </LinkContainer>
                 <Link
                   className="dropdown-item text-sm font-semibold leading-6 text-gray-800 cursor-pointer "

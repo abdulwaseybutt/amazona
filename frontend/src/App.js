@@ -43,6 +43,7 @@ import CategoryMenu from "./components/Categories";
 import StoreFront from "./components/Store-Front";
 import NavBar from "./components/Nav-Bar";
 import CategoryScreen from "./screens/CategoryScreen";
+import  Chat  from "./components/Chat/chat";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 
@@ -161,6 +162,8 @@ function App() {
               <Route path="/search" element={<SearchScreen />} />
               <Route path="/signin" element={<SigninScreen />} />
               <Route path="/signup" element={<SignupScreen />} />
+              <Route path="/chat/:productId" element={<Chat key="chat-seller" />} />
+              <Route exact path="/chat" element={<Chat key="chat"/>} />
               <Route
                 path="/profile"
                 element={
