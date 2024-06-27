@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
 import { Store } from "../Store";
 import LoadingBox from "../components/LoadingBox";
 import MessageBox from "../components/MessageBox";
-import { API_URL, getError } from "../utils";
+import { API_URL, delay, getError } from "../utils";
 import ListGroup from "react-bootstrap/ListGroup";
 
 const reducer = (state, action) => {
@@ -246,9 +246,12 @@ export default function ProductListScreen(props) {
     toast.success("Image removed successfully. click Update to apply it");
   };
 
-  const submitHandler = async () => {
+  const submitHandler = async (event) => {
+    event?.preventDefault();
+
     formData.image = produdtImageUrl;
     formData.userId = userInfo?._id;
+    const toastId= toast.loading("The product is being created..");
     const result = await fetch(`${API_URL}api/products`, {
       method: "POST", // *GET, POST, PUT, DELETE, etc.
       headers: {
@@ -257,8 +260,18 @@ export default function ProductListScreen(props) {
         Authorization: `Bearer ${userInfo.token}`,
       },
       body: JSON.stringify(formData), // body data type must match "Content-Type" header
-    }).then((response) => response.json());
+    }).then((response) => response.json()).catch((err)=>{
+      toast.dismiss(toastId);
+      toast.error("The product cannot be created");
+    });
+
+    await delay(2000);
+    toast.dismiss(toastId);
     console.log("request resukt ", result);
+    if(result.error){
+      toast.error(result.error);
+      return;
+    }
     if (result.message) {
       setFormData({});
       setShowForm(false);
