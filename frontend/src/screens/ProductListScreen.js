@@ -249,6 +249,19 @@ export default function ProductListScreen(props) {
   const submitHandler = async (event) => {
     event?.preventDefault();
 
+    if(produdtImageUrl.length==0) {
+      toast.error("Please upload image of the product");
+      return;
+    }
+    else if(isNaN(formData.product_price)){
+      toast.error("Price must be a number");
+      return;
+    }
+    else if(isNaN(formData.product_stock)){
+      toast.error("Stock Must be a number");
+      return;
+    }
+
     formData.image = produdtImageUrl;
     formData.userId = userInfo?._id;
     const toastId= toast.loading("The product is being created..");

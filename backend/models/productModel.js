@@ -13,10 +13,10 @@ const reviewSchema = new mongoose.Schema(
 
 const productSchema = mongoose.Schema(
   {
-    name: { type: String, required: true, unique: true },
+    name: { type: String, required: true, unique: false },
     seller: { type: mongoose.Schema.Types.ObjectID, ref: "User" },
     userId: { type: String, required: true },
-    slug: { type: String, required: false, unique: true },
+    slug: { type: String, required: false, unique: false },
     image: { type: String, required: true },
     images: [String],
     brand: { type: String, required: false },
