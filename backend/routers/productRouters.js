@@ -73,7 +73,7 @@ productRouter.post(
     }
     catch(error){
       let errorMessage=error?.message;
-      if(errorMessage.includes("duplicate key")) errorMessage="The product name must be unique";
+      if(errorMessage.includes("duplicate key")) errorMessage="The product name is already taken";
       return res.status(400).send({message:"Error in creating the product",error:errorMessage});
     }
   })
