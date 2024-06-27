@@ -14,8 +14,18 @@ productRouter.get("/", async (req, res) => {
   //     "seller",
   //     "seller.name seller.logo"
   //   );
-  const products = await Product.find();
-  res.send(products);
+  try{
+  console.log("request is comming here....");
+  const products = await Product.find({});
+  console.log("products are fetched....");
+  return res.status(200).send(products);
+  }
+  catch(err){
+   return res.status(400).send({
+      err:err,
+      message:"Error in fetching the products.."
+    })
+  }
 });
 
 productRouter.get("/seller", async (req, res) => {
@@ -56,9 +66,16 @@ productRouter.post(
       description: req.body.product_desc,
     });
     console.log("newProduct ", newProduct);
+    try{
     const product = await newProduct.save();
     console.log("product ", product);
-    res.send({ message: "Product Created", product });
+    res.status(200).send({ message: "Product Created", product });
+    }
+    catch(error){
+      let errorMessage=error?.message;
+      if(errorMessage.includes("duplicate key")) errorMessage="The product name must be unique";
+      return res.status(400).send({message:"Error in creating the product",error:errorMessage});
+    }
   })
 );
 
