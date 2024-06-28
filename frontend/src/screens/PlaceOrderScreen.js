@@ -62,6 +62,7 @@ export default function PlaceOrderScreen() {
       totalPrice,
     };
 
+    const toastId= toast.loading("Your order is processing....");
     try {
       dispatch({ type: "CREATE_REQUEST" });
 
@@ -78,6 +79,9 @@ export default function PlaceOrderScreen() {
     } catch (err) {
       dispatch({ type: "CREATE_FAIL" });
       toast.error(getError(err));
+    }
+    finally{
+      toast.dismiss(toastId);
     }
   };
 

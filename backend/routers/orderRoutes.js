@@ -10,6 +10,7 @@ import {
   mailgun,
   payOrderEmailTemplate,
 } from "../utils.js";
+import { sendEmail } from "../services/email.js";
 
 const orderRouter = express.Router();
 
@@ -20,6 +21,8 @@ orderRouter.get(
   expressAsyncHandler(async (req, res) => {
     const seller = req.query.seller || "";
     const sellerFilter = seller ? { seller } : {};
+
+    console.log(sellerFilter);
 
     const orders = await Order.find({ ...sellerFilter }).populate(
       "user",
@@ -167,23 +170,8 @@ orderRouter.put(
 
       const updatedOrder = await order.save();
 
-      mailgun()
-        .messages()
-        .send(
-          {
-            from: "Turkfy <e-turkfy@mg.yourdomain.com>",
-            to: `${order.user.name} <${order.user.email}>`,
-            subject: `New order ${order._id}`,
-            html: payOrderEmailTemplate(order),
-          },
-          (error, body) => {
-            if (error) {
-              console.log(error);
-            } else {
-              console.log(body);
-            }
-          }
-        );
+
+      await sendEmail({from:"Turkfy <e-turkfy@mg.yourdomain.com>",to:req.user?.email,subject:`New Order ${order._id}`,html: payOrderEmailTemplate(order)});
 
       res.send({ message: "Order Paid", order: updatedOrder });
     } else {

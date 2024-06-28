@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
 import axios from "axios";
 import { API_URL } from "../utils";
+import { toast } from "react-toastify";
 
 const StripePaymentForm = ({
   totalPrice = 0,
@@ -16,6 +17,7 @@ const StripePaymentForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    const toastId= toast.loading("Payment is processing...");
 
     axios
       .post(
@@ -37,10 +39,15 @@ const StripePaymentForm = ({
           })
           .then((res) => {
             onSuccess(res.paymentIntent);
+            toast.dismiss(toastId);
           })
-          .catch((err) => onError(err));
+          .catch((err) => {
+            onError(err)
+            toast.dismiss(toastId);
+          });
       })
       .catch((error) => {
+        toast.dismiss(toastId);
         return;
       });
   };
