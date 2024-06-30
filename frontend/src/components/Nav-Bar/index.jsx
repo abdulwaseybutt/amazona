@@ -81,7 +81,6 @@ function NavBar({
           </div>
 
           <Nav className="sm:justify-content-end justify-center sm:items-center items-start flex-row sm:pt-0 pt-6 sm:w-40 min-w-40 w-full">
-
             <Link
               to="/chat"
               className="nav-link text-sm font-semibold leading-6 relative w-max text-[#212529] cursor-pointer flex align-middle items-center"
@@ -93,7 +92,7 @@ function NavBar({
               to="/cart"
               className="nav-link text-sm font-semibold leading-6 relative w-max text-[#212529] cursor-pointer flex align-middle items-center"
             >
-              <FiShoppingCart size="20px"/>
+              <FiShoppingCart size="20px" />
               {cart.cartItems.length > 0 && (
                 <Badge pill bg="danger" className="absolute -top-1 -right-1">
                   {cart.cartItems.reduce((a, c) => a + c.quantity, 0)}
@@ -143,7 +142,11 @@ function NavBar({
                 <LinkContainer to="/seller/orders">
                   <NavDropdown.Item>Orders</NavDropdown.Item>
                 </LinkContainer>
-                <LinkContainer to="/chat/seller/" >
+                {/* Including order history temporarily */}
+                <LinkContainer to="/orderhistory">
+                  <NavDropdown.Item>Order History</NavDropdown.Item>
+                </LinkContainer>
+                <LinkContainer to="/chat/seller/">
                   <NavDropdown.Item>Chat</NavDropdown.Item>
                 </LinkContainer>
                 <Link
