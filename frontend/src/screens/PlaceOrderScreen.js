@@ -62,7 +62,7 @@ export default function PlaceOrderScreen() {
       totalPrice,
     };
 
-    const toastId= toast.loading("Your order is processing....");
+    const toastId = toast.loading("Your order is processing....");
     try {
       dispatch({ type: "CREATE_REQUEST" });
 
@@ -79,8 +79,7 @@ export default function PlaceOrderScreen() {
     } catch (err) {
       dispatch({ type: "CREATE_FAIL" });
       toast.error(getError(err));
-    }
-    finally{
+    } finally {
       toast.dismiss(toastId);
     }
   };
@@ -147,7 +146,7 @@ export default function PlaceOrderScreen() {
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg shadow sm:rounded-lg">
+            {/* <div className="bg-white p-4 rounded-lg shadow sm:rounded-lg">
               <div className="border-b border-gray-200 bg-white ">
                 <h3 className="text-base font-semibold leading-6 text-gray-900">
                   Payment
@@ -169,7 +168,7 @@ export default function PlaceOrderScreen() {
                   </Link>
                 </dl>
               </div>
-            </div>
+            </div> */}
 
             <div className="bg-white p-4 rounded-lg shadow sm:rounded-lg">
               <div className=" bg-white ">

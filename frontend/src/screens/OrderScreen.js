@@ -369,7 +369,7 @@ export default function OrderScreen() {
             </Card.Body>
           </Card>
 
-          {!order.isPaid && (
+          {/* {!order.isPaid && (
             <Card className="mb-3">
               <Card.Body>
                 <ListGroup.Item>
@@ -383,7 +383,7 @@ export default function OrderScreen() {
                 </ListGroup.Item>
               </Card.Body>
             </Card>
-          )}
+          )} */}
         </Col>
       </Row>
     </div>
