@@ -103,12 +103,12 @@ export default function ProductListScreen(props) {
     } = formData;
     return Boolean(
       !product_name ||
-        !product_brand ||
-        !product_category ||
-        !product_desc ||
-        !product_stock ||
-        !product_price ||
-        !produdtImageUrl
+      !product_brand ||
+      !product_category ||
+      !product_desc ||
+      !product_stock ||
+      !product_price ||
+      !produdtImageUrl
     );
   }, [formData, produdtImageUrl]);
 
@@ -133,7 +133,7 @@ export default function ProductListScreen(props) {
           setProductList(sellerProducts);
         }
         dispatch({ type: "FETCH_SUCCESS", payload: data?.data });
-      } catch (err) {}
+      } catch (err) { }
     };
 
     if (successDelete) {
@@ -190,7 +190,7 @@ export default function ProductListScreen(props) {
     const result = await fetch(`${API_URL}api/products/categories`);
     const categories = await result.json();
     setCategoriesList(categories);
-    setFormData({ ...formData, product_category: categories[0] });
+    setFormData({ ...formData, product_category: categories[0].name });
   };
 
   const uploadFileHandler = async (e) => {
@@ -249,22 +249,23 @@ export default function ProductListScreen(props) {
   const submitHandler = async (event) => {
     event?.preventDefault();
 
-    if(produdtImageUrl.length==0) {
+    if (produdtImageUrl.length == 0) {
       toast.error("Please upload image of the product");
       return;
     }
-    else if(isNaN(formData.product_price)){
+    else if (isNaN(formData.product_price)) {
       toast.error("Price must be a number");
       return;
     }
-    else if(isNaN(formData.product_stock)){
+    else if (isNaN(formData.product_stock)) {
       toast.error("Stock Must be a number");
       return;
     }
+    console.log("form Data", formData);
 
     formData.image = produdtImageUrl;
     formData.userId = userInfo?._id;
-    const toastId= toast.loading("The product is being created..");
+    const toastId = toast.loading("The product is being created..");
     const result = await fetch(`${API_URL}api/products`, {
       method: "POST", // *GET, POST, PUT, DELETE, etc.
       headers: {
@@ -273,7 +274,7 @@ export default function ProductListScreen(props) {
         Authorization: `Bearer ${userInfo.token}`,
       },
       body: JSON.stringify(formData), // body data type must match "Content-Type" header
-    }).then((response) => response.json()).catch((err)=>{
+    }).then((response) => response.json()).catch((err) => {
       toast.dismiss(toastId);
       toast.error("The product cannot be created");
     });
@@ -281,7 +282,7 @@ export default function ProductListScreen(props) {
     await delay(2000);
     toast.dismiss(toastId);
     console.log("request resukt ", result);
-    if(result.error){
+    if (result.error) {
       toast.error(result.error);
       return;
     }
@@ -393,13 +394,13 @@ export default function ProductListScreen(props) {
                               userInfo
                                 ? userInfo?.isAdmin
                                   ? () => {
-                                      navigate(`/admin/product/${item._id}`);
-                                    }
+                                    navigate(`/admin/product/${item._id}`);
+                                  }
                                   : userInfo?.isSeller
-                                  ? () => {
+                                    ? () => {
                                       navigate(`/seller/product/${item._id}`);
                                     }
-                                  : () => {
+                                    : () => {
                                       return true;
                                     }
                                 : null
