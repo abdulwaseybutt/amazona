@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema(
       rating: { type: Number, default: 0, required: true },
       numReviews: { type: Number, default: 0, required: true },
     },
+    videoUrl: { type: String, required: false },
   },
   {
     timestamps: true,
