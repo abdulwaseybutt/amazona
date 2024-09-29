@@ -2,6 +2,7 @@ import React, { useContext, useReducer, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
 import { Store } from "../Store";
 import { toast } from "react-toastify";
 import { API_URL, getError } from "../utils";
@@ -32,9 +33,15 @@ export default function ProfileScreen() {
   const [sellerLogo, setSellerLogo] = useState("");
   const [sellerDescription, setSellerDescription] = useState("");
 
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoURL, setVideoURL] = useState(userInfo?.videoUrl || "");
+
   const [{ loadingUpdate }, dispatch] = useReducer(reducer, {
     loadingUpdate: false,
   });
+
+  console.log("userInfo", userInfo);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -65,6 +72,67 @@ export default function ProfileScreen() {
     } catch (err) {
       dispatch({ type: "FETCH_FAIL" });
       toast.error(getError(err));
+    }
+  };
+
+  const handleVideoUpload = async () => {
+    if (!videoFile) {
+      toast.error("Please select a video file.");
+      return;
+    }
+
+    // Get video duration to check if it's between 60 and 90 seconds
+    let videoDuration = await new Promise((resolve) => {
+      const videoElement = document.createElement("video");
+      videoElement.preload = "metadata";
+      videoElement.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(videoElement.src);
+        resolve(videoElement.duration);
+      };
+      videoElement.src = URL.createObjectURL(videoFile);
+    });
+    videoDuration = Math.floor(videoDuration);
+    // Check if the video duration is valid
+    if (videoDuration < 60 || videoDuration > 90) {
+      toast.error("The video must be between 60 and 90 seconds.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("video", videoFile);
+    const toastId = toast.loading("Uploading Video...");
+    try {
+      const { data } = await axios.post(`${API_URL}api/upload/uservideo`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      });
+      toast.dismiss(toastId);
+      if (data && data.url) {
+        setVideoURL(data.url);
+        toast.success("Video uploaded successfully");
+        setShowVideoModal(false);
+      } else {
+        toast.error("Video upload failed. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      if (err.response) {
+        if (err.response.status === 400) {
+          toast.error("Invalid video upload. Please check the file and try again.");
+        } else if (err.response.status === 401) {
+          toast.error("Unauthorized. Please log in again.");
+        } else if (err.response.status === 500) {
+          toast.error("Server error. Please try again later.");
+        } else {
+          toast.error(`Unexpected error`);
+        }
+      } else if (err.request) {
+        toast.error("No response from the server. Please check your internet connection.");
+      } else {
+        toast.error(`Error: ${err.message}`);
+      }
     }
   };
 
@@ -172,10 +240,50 @@ export default function ProfileScreen() {
                   Update
                 </button>
               </div>
+              <button
+                className="flex w-full justify-center rounded-md bg-orange-600 px-3 py-1.5 text-sm font-bold transition-all leading-6 text-white hover:text-orange-600 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                type="button"
+                onClick={() => setShowVideoModal(true)}
+              >
+                Upload Video
+              </button>
+
+              {videoURL && (
+                <div className="video-section bg-orange-600 p-6 rounded-lg shadow-lg mt-6">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4 text-white">Profile Video</h3>
+                  <video src={videoURL} controls className="w-full rounded-lg shadow-md" />
+                </div>
+              )}
             </form>
           </div>
         </div>
       </div>
+      <Modal show={showVideoModal} onHide={() => setShowVideoModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Upload Video</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Group>
+            <Form.Label>Choose Video</Form.Label>
+            <Form.Control
+              type="file"
+              accept="video/*"
+              onChange={(e) => setVideoFile(e.target.files[0])}
+            />
+            <Form.Text>
+              The video must be between 60-90 seconds.
+            </Form.Text>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => setShowVideoModal(false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleVideoUpload}>
+            Upload Video
+          </Button>
+        </Modal.Footer>
+      </Modal>
       {/* <div className="container small-container">
         <Helmet>
           <title>User Profile</title>
