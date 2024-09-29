@@ -80,7 +80,7 @@ userRouter.post(
   "/signin",
   expressASyncHandler(async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
-    const { _id, name, email, password, isAdmin, isSeller } = user;
+    const { _id, name, email, password, isAdmin, isSeller, videoUrl } = user;
 
     if (user) {
       if (bcrypt.compareSync(req.body.password, password)) {
@@ -90,6 +90,7 @@ userRouter.post(
           email,
           isAdmin,
           isSeller,
+          videoUrl,
           token: generateToken(user),
         });
 
