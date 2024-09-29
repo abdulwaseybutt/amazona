@@ -3,8 +3,16 @@ import expressAsyncHandler from "express-async-handler";
 import Product from "../models/productModel.js";
 import { isAdmin, isAuth, isSellerOrAdmin } from "../utils.js";
 import Category from "../models/productCategoryModel.js";
+import multer from "multer";
+// import csv from "csv-parser";
+import fs from "fs";
+import { v2 as cloudinary } from "cloudinary";
+import AdmZip from "adm-zip";
+
 
 const productRouter = express.Router();
+
+const upload = multer({ dest: 'uploads/' });
 
 productRouter.get("/", async (req, res) => {
   // const seller = req.query.seller || "";
@@ -14,16 +22,15 @@ productRouter.get("/", async (req, res) => {
   //     "seller",
   //     "seller.name seller.logo"
   //   );
-  try{
-  console.log("request is comming here....");
-  const products = await Product.find({});
-  console.log("products are fetched....");
-  return res.status(200).send(products);
+  try {
+    const products = await Product.find({});
+    console.log("products are fetched....");
+    return res.status(200).send(products);
   }
-  catch(err){
-   return res.status(400).send({
-      err:err,
-      message:"Error in fetching the products.."
+  catch (err) {
+    return res.status(400).send({
+      err: err,
+      message: "Error in fetching the products.."
     })
   }
 });
@@ -66,15 +73,15 @@ productRouter.post(
       description: req.body.product_desc,
     });
     console.log("newProduct ", newProduct);
-    try{
-    const product = await newProduct.save();
-    console.log("product ", product);
-    res.status(200).send({ message: "Product Created", product });
+    try {
+      const product = await newProduct.save();
+      console.log("product saved", product);
+      res.status(200).send({ message: "Product Created", product });
     }
-    catch(error){
-      let errorMessage=error?.message;
-      if(errorMessage.includes("duplicate key")) errorMessage="The product name is already taken";
-      return res.status(400).send({message:"Error in creating the product",error:errorMessage});
+    catch (error) {
+      let errorMessage = error?.message;
+      if (errorMessage.includes("duplicate key")) errorMessage = "The product name is already taken";
+      return res.status(400).send({ message: "Error in creating the product", error: errorMessage });
     }
   })
 );
@@ -207,43 +214,43 @@ productRouter.get(
     const queryFilter =
       searchQuery && searchQuery !== "all"
         ? {
-            name: {
-              $regex: searchQuery,
-              $options: "i",
-            },
-          }
+          name: {
+            $regex: searchQuery,
+            $options: "i",
+          },
+        }
         : {};
     const categoryFilter = category && category !== "all" ? { category } : {};
     const ratingFilter =
       rating && rating !== "all"
         ? {
-            rating: {
-              $gte: Number(rating),
-            },
-          }
+          rating: {
+            $gte: Number(rating),
+          },
+        }
         : {};
     const priceFilter =
       price && price !== "all"
         ? {
-            // 1-50
-            price: {
-              $gte: Number(price.split("-")[0]),
-              $lte: Number(price.split("-")[1]),
-            },
-          }
+          // 1-50
+          price: {
+            $gte: Number(price.split("-")[0]),
+            $lte: Number(price.split("-")[1]),
+          },
+        }
         : {};
     const sortOrder =
       order === "featured"
         ? { featured: -1 }
         : order === "lowest"
-        ? { price: 1 }
-        : order === "highest"
-        ? { price: -1 }
-        : order === "toprated"
-        ? { rating: -1 }
-        : order === "newest"
-        ? { createdAt: -1 }
-        : { _id: -1 };
+          ? { price: 1 }
+          : order === "highest"
+            ? { price: -1 }
+            : order === "toprated"
+              ? { rating: -1 }
+              : order === "newest"
+                ? { createdAt: -1 }
+                : { _id: -1 };
 
     const products = await Product.find({
       ...queryFilter,
@@ -320,5 +327,113 @@ productRouter.get("/:id", async (req, res) => {
     res.status(404).send({ message: "Product not found." });
   }
 });
+
+productRouter.post(
+  "/bulk-upload",
+  upload.single('zipFile'), // To handle ZIP file upload
+  isAuth,
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    console.log("landed in bulk upload");
+
+    // Extract ZIP file contents
+    const zip = new AdmZip(req.file.path);
+    const zipEntries = zip.getEntries();
+    console.log("zipEntries", zipEntries);
+
+    let products = [];
+    let imageFiles = {};
+    let successfulUploads = 0;
+    let totalProducts = 0;
+
+    // Process each entry in the ZIP file
+    zipEntries.forEach((entry) => {
+      if (entry.entryName.endsWith('.csv')) {
+        // Parse the CSV file
+        const csvFile = zip.readAsText(entry);
+        csvFile
+          .split('\n')
+          .map(row => row.split(',')) // Split CSV into rows and columns
+          .forEach(([srNo, name, category, price, stock, description, brand]) => {
+            if (srNo && name && category && price && stock && description && brand) {
+              products.push({ srNo, name, category, price, stock, description, brand });
+            }
+            totalProducts++;
+          });
+        if (totalProducts > 0) {
+          totalProducts = totalProducts - 1;
+        }
+      } else if (entry.entryName.match(/\.(jpg|jpeg|png)$/)) {
+        // Collect image files
+        const srNo = entry.entryName.split('.')[0]; // Get SrNo from image name
+        imageFiles[srNo] = entry;
+      }
+    });
+
+    console.log("Total No of Products:", totalProducts);
+
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+
+    // Iterate over products, upload images, and save to MongoDB
+    for (let product of products) {
+      let discardedThisProduct = false;
+      const imageEntry = imageFiles[product.srNo];
+
+      if (!imageEntry) {
+        discardedThisProduct = true; // Mark the product as discarded once
+        console.log(`Image missing for product ${product.name}, discarded.`);
+      }
+
+      if (!discardedThisProduct) {
+        try {
+          // Upload image to Cloudinary
+          const result = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream((error, result) => {
+              if (error) reject(error);
+              resolve(result);
+            }).end(zip.readFile(imageEntry));
+          });
+
+          // Create new product object
+          const newProduct = new Product({
+            name: product.name,
+            seller: req.user._id,
+            userId: req.user._id,
+            slug: product.name.toLowerCase().replace(/\s+/g, '-'),
+            image: result.secure_url, // Cloudinary image URL
+            price: product.price,
+            category: product.category,
+            brand: product.brand,
+            countInStock: product.stock,
+            description: product.description,
+            rating: 0,
+            numReviews: 0,
+          });
+
+          // Save the product to MongoDB
+          await newProduct.save();
+          successfulUploads++;
+        } catch (error) {
+          console.error(`Failed to upload image for product ${product.name}: ${error}`);
+        }
+      }
+    }
+
+    // Clean up ZIP file
+    fs.unlinkSync(req.file.path);
+
+    res.send({
+      message: 'Products uploaded successfully!',
+      successfulUploads,
+      totalProducts,
+      failedUploads: totalProducts - successfulUploads,
+    });
+  })
+);
+
 
 export default productRouter;
