@@ -5,7 +5,7 @@ import { isAdmin, isAuth, isSellerOrAdmin } from "../utils.js";
 import Category from "../models/productCategoryModel.js";
 import multer from "multer";
 // import csv from "csv-parser";
-import fs from "fs";
+import { promises as fs } from 'fs';
 import { v2 as cloudinary } from "cloudinary";
 import AdmZip from "adm-zip";
 
@@ -424,7 +424,11 @@ productRouter.post(
     }
 
     // Clean up ZIP file
-    fs.unlinkSync(req.file.path);
+    try {
+      await fs.unlink(req.file.path); // Delete the file asynchronously
+    } catch (fsError) {
+      console.error("File Deletion Error:", fsError);
+    }
 
     res.send({
       message: 'Products uploaded successfully!',
