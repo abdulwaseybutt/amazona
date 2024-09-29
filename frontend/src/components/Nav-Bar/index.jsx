@@ -149,6 +149,11 @@ function NavBar({
                 <LinkContainer to="/chat/seller/">
                   <NavDropdown.Item>Chat</NavDropdown.Item>
                 </LinkContainer>
+                <LinkContainer to="/profile">
+                  <NavDropdown.Item className="text-sm font-semibold leading-6 text-gray-800 cursor-pointer">
+                    User Profile
+                  </NavDropdown.Item>
+                </LinkContainer>
                 <Link
                   className="dropdown-item text-sm font-semibold leading-6 text-gray-800 cursor-pointer "
                   to="#signout"
@@ -181,6 +186,11 @@ function NavBar({
                 </LinkContainer>
                 <LinkContainer to="/support">
                   <NavDropdown.Item>Support</NavDropdown.Item>
+                </LinkContainer>
+                <LinkContainer to="/profile">
+                  <NavDropdown.Item className="text-sm font-semibold leading-6 text-gray-800 cursor-pointer">
+                    User Profile
+                  </NavDropdown.Item>
                 </LinkContainer>
                 <Link
                   className="dropdown-item text-sm font-semibold leading-6 text-gray-800 cursor-pointer "
