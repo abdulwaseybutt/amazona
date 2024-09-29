@@ -91,7 +91,27 @@ export default function ProductListScreen(props) {
   const [categoriesList, setCategoriesList] = useState([]);
   const [productList, setProductList] = useState([]);
   const [produdtImageUrl, setProductImageUrl] = useState([]);
-
+  const fetchData = async (seller) => {
+    try {
+      const data = await axios.get(
+        // `${API_URL}api/products/admin?page=${page}&seller=${
+        `${API_URL}api/products/`,
+        {
+          headers: { Authorization: `Bearer ${userInfo.token}` },
+        }
+      );
+      if (userInfo && userInfo?.isAdmin) {
+        setProductList(data?.data);
+      } else if (userInfo && userInfo?.isSeller) {
+        const sellerId = userInfo?._id;
+        const sellerProducts = data?.data?.filter(
+          (item) => item?.userId === sellerId
+        );
+        setProductList(sellerProducts);
+      }
+      dispatch({ type: "FETCH_SUCCESS", payload: data?.data });
+    } catch (err) { }
+  };
   const submitDisabled = useMemo(() => {
     const {
       product_name,
@@ -114,27 +134,7 @@ export default function ProductListScreen(props) {
 
   useEffect(() => {
     fetchCategories();
-    const fetchData = async (seller) => {
-      try {
-        const data = await axios.get(
-          // `${API_URL}api/products/admin?page=${page}&seller=${
-          `${API_URL}api/products/`,
-          {
-            headers: { Authorization: `Bearer ${userInfo.token}` },
-          }
-        );
-        if (userInfo && userInfo?.isAdmin) {
-          setProductList(data?.data);
-        } else if (userInfo && userInfo?.isSeller) {
-          const sellerId = userInfo?._id;
-          const sellerProducts = data?.data?.filter(
-            (item) => item?.userId === sellerId
-          );
-          setProductList(sellerProducts);
-        }
-        dispatch({ type: "FETCH_SUCCESS", payload: data?.data });
-      } catch (err) { }
-    };
+    fetchData();
 
     if (successDelete) {
       dispatch({ type: "DELETE_RESET" });
@@ -261,7 +261,6 @@ export default function ProductListScreen(props) {
       toast.error("Stock Must be a number");
       return;
     }
-    console.log("form Data", formData);
 
     formData.image = produdtImageUrl;
     formData.userId = userInfo?._id;
@@ -292,20 +291,80 @@ export default function ProductListScreen(props) {
     }
   };
 
+  const uploadZipHandler = async (e) => {
+    const file = e.target.files[0];
+
+    if (!file) {
+      toast.error("Please select a zip file");
+      return;
+    }
+    console.log("file type", file.type);
+
+    if (file.type !== "application/x-zip-compressed") {
+      toast.error("Only .zip files are allowed");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("zipFile", file);
+
+    const toastId = toast.loading("Uploading ZIP file...");
+
+    try {
+      const { data } = await axios.post(`${API_URL}api/products/bulk-upload`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      });
+
+      toast.dismiss(toastId);
+      toast.success(`ZIP file uploaded successfully products total: ${data.totalProducts}, success : ${data.successfulUploads}, failed: ${data.failedUploads}`);
+
+      // If you want to save the uploaded file URL in the state
+      // setProductImageUrl(data.secure_url);
+
+      dispatch({ type: "CREATE_SUCCESS" });
+      fetchData();
+    } catch (err) {
+      toast.dismiss(toastId);
+      toast.error(getError(err));
+      dispatch({ type: "CREATE_FAIL" });
+    }
+  };
+
+
   return (
     <div>
       <div className="container py-6">
         <div className="flex align-middle justify-between items-center w-full">
           <h1 className="text-3xl font-bold text-gray-700">Products</h1>
-          <button
-            className="block rounded-md bg-orange-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-orange-500  outline-none "
-            type="button"
-            onClick={() => {
-              setShowForm(true);
-            }}
-          >
-            Create Product
-          </button>
+          <div className="flex flex-row space-x-4">
+            <div>
+              <input
+                type="file"
+                id="file-upload"
+                onChange={uploadZipHandler}
+                accept=".zip"
+                className="hidden" // Hide the default input
+              />
+              <label
+                htmlFor="file-upload"
+                className="block cursor-pointer rounded-md bg-orange-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-orange-500 outline-none"
+              >
+                Upload ZIP File
+              </label>
+            </div>
+            <button
+              className="block rounded-md bg-orange-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-orange-500  outline-none "
+              type="button"
+              onClick={() => {
+                setShowForm(true);
+              }}
+            >
+              Create Product
+            </button>
+          </div>
         </div>
 
         {loadingCreate && <LoadingBox />}
